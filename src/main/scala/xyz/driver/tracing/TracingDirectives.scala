@@ -2,8 +2,8 @@ package xyz.driver.tracing
 
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
+import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server._ //{Directive, Directive0, Directive1}
 import java.util.UUID
 import scala.util.Random
 import java.time._
@@ -44,27 +44,21 @@ trait TracingDirectives {
         }
 
         withTraceContext(TraceContext.fromSpan(span)) & mapRouteResult { res =>
-          tracer.submit(span.ended())
+          tracer.submit(span.end())
           res
         }
     }
 
   /*
-   def span2(name2: String, tracer: Tracer): Directive0 = {
-   val f: RouteResult ⇒ RouteResult = ???
-   Directive { inner ⇒ ctx ⇒
-   inner(())(ctx).map(f)(ctx.executionContext)
-   }
-   }*/
+  def span2(name2: String, tracer: Tracer): Directive0 = {
+    val f: RouteResult ⇒ RouteResult = ???
+    Directive { inner ⇒ ctx ⇒
+      inner(())(ctx).map(f)(ctx.executionContext)
+    }
+  }
+  */
 
 }
-/*
-   def span2(name2: String, tracer: Tracer): Directive0 = {
-   val f: RouteResult ⇒ RouteResult = ???
-   Directive { inner ⇒ ctx ⇒
-   inner(())(ctx).map(f)(ctx.executionContext)
-   }
-   }*/
 
 object TracingDirectives {
 

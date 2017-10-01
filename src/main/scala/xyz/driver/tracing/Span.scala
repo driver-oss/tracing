@@ -13,9 +13,9 @@ case class Span(
     endTime: Instant = Instant.now
 ) {
 
-  def started(clock: Clock = Clock.systemUTC): Span =
+  def start(clock: Clock = Clock.systemUTC): Span =
     this.copy(startTime = clock.instant())
-  def ended(clock: Clock = Clock.systemUTC): Span =
+  def end(clock: Clock = Clock.systemUTC): Span =
     this.copy(endTime = clock.instant())
 
   def withLabels(extraLabels: (String, String)*) =

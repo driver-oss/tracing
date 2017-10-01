@@ -107,5 +107,5 @@ object Trace {
 
 case class Traces(traces: Seq[Trace])
 object Traces {
-  implicit val format: JsonFormat[Traces] = jsonFormat1(Traces.apply)
+  implicit val format: RootJsonFormat[Traces] = jsonFormat1(Traces.apply)
 }
