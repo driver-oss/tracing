@@ -24,9 +24,11 @@ object TraceSpan {
   sealed trait SpanKind
   // Unspecified
   case object Unspecified extends SpanKind
-  // Indicates that the span covers server-side handling of an RPC or other remote network request.
+  // Indicates that the span covers server-side handling of an RPC or other
+  // remote network request.
   case object RpcServer extends SpanKind
-  // Indicates that the span covers the client-side wrapper around an RPC or other remote request.
+  // Indicates that the span covers the client-side wrapper around an RPC or
+  // other remote request.
   case object RpcClient extends SpanKind
 
   object SpanKind {

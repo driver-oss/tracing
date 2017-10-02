@@ -29,7 +29,7 @@ object OAuth2 {
 
   /** Request a new access token for the given scopes.
     *
-    * Implements the OAUTH2 workflow as descried here
+    * Implements the OAUTH2 workflow as descried in
     * https://developers.google.com/identity/protocols/OAuth2ServiceAccount
     */
   def requestAccessToken(
@@ -89,18 +89,18 @@ object OAuth2 {
             http.system.log.info("tracing access token expired, refreshing")
             requestAccessToken(http, serviceAccountFile, scopes).map {
               case (newExpiration, newToken) =>
-                http.system.log.debug("new tracing access token otained")
+                http.system.log.debug("new tracing access token obtained")
                 (request, newExpiration, newToken)
             }
           } else {
             Future.successful((request, expiration, accessToken))
           }
       }
-      .drop(1) // drop initial element
+      .drop(1) // drop initial, empty HttpRequest
       .map {
         case (request, _, accessToken) =>
           request.withHeaders(
-            RawHeader("Authorization", "Bearer " + accessToken)
+            RawHeader("Authorization", s"Bearer $accessToken")
           )
       }
 

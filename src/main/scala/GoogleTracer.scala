@@ -17,7 +17,8 @@ import scala.util.control._
 class GoogleTracer(projectId: String,
                    serviceAccountFile: Path,
                    bufferSize: Int = 1000,
-                   concurrentConnections: Int = 1)(implicit system: ActorSystem,
+                   bufferDelay: FiniteDuration = 2.seconds,
+                   concurrentConnections: Int = 5)(implicit system: ActorSystem,
                                                    materializer: Materializer)
     extends Tracer {
 
@@ -27,7 +28,7 @@ class GoogleTracer(projectId: String,
 
   private val batchingPipeline: Flow[Span, Traces, _] =
     Flow[Span]
-      .groupedWithin(bufferSize, 1.second)
+      .groupedWithin(bufferSize, bufferDelay)
       .map { spans =>
         val traces: Seq[Trace] = spans
           .groupBy(_.traceId)
