@@ -46,7 +46,9 @@ object TraceSpan {
   }
 
   implicit val instantFormat = new JsonFormat[Instant] {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXXZ")
+    val formatter = DateTimeFormatter
+      .ofPattern("yyyy-MM-dd'T'HH:mm:ssXXXZ")
+      .withZone(ZoneId.of("UTC"))
     override def write(x: Instant): JsValue = JsString(formatter.format(x))
     override def read(x: JsValue): Instant = x match {
       case JsString(x) => Instant.parse(x)

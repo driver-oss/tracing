@@ -28,17 +28,14 @@ trait TracingDirectives {
         val span: Span = parent match {
           case None => // no parent span, create new trace
             Span(
-              traceId = UUID.randomUUID,
-              spanId = UUID.randomUUID,
               name = name,
               labels = labels
             )
           case Some(TraceContext(traceId, parentSpanId)) =>
             Span(
-              traceId = traceId,
-              spanId = UUID.randomUUID,
-              parentSpanId = parentSpanId,
               name = name,
+              traceId = traceId,
+              parentSpanId = parentSpanId,
               labels = labels
             )
         }
@@ -56,7 +53,7 @@ trait TracingDirectives {
       inner(())(ctx).map(f)(ctx.executionContext)
     }
   }
-  */
+ */
 
 }
 

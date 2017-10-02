@@ -4,9 +4,9 @@ import java.util.UUID
 import java.time._
 
 case class Span(
-    traceId: UUID,
-    spanId: UUID,
     name: String,
+    traceId: UUID = UUID.randomUUID(),
+    spanId: UUID = UUID.randomUUID(),
     parentSpanId: Option[UUID] = None,
     labels: Map[String, String] = Map.empty,
     startTime: Instant = Instant.now,

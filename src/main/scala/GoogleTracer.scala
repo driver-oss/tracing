@@ -1,6 +1,7 @@
 package xyz.driver.tracing
-package google
 
+import google._
+import java.nio.file.Path
 import akka.stream._
 import akka.stream.scaladsl._
 import akka.actor.ActorSystem
@@ -14,10 +15,13 @@ import scala.concurrent.duration._
 import spray.json.DefaultJsonProtocol._
 import java.util.UUID
 
-class GoogleTracer(projectId: String, authToken: String, bufferSize: Int = 1000, concurrentConnections: Int = 1)(
-    implicit system: ActorSystem,
-    materializer: Materializer)
+class GoogleTracer(projectId: String,
+                   serviceAccountFile: Path,
+                   bufferSize: Int = 1000,
+                   concurrentConnections: Int = 1)(implicit system: ActorSystem,
+                                                   materializer: Materializer)
     extends Tracer {
+
   import system.dispatcher
 
   lazy val connectionPool = Http().superPool[Unit]()
@@ -43,22 +47,32 @@ class GoogleTracer(projectId: String, authToken: String, bufferSize: Int = 1000,
   lazy val queue: SourceQueueWithComplete[Span] = {
     Source
       .queue[Span](bufferSize, OverflowStrategy.dropNew)
+      .log("debug")
       .viaMat(batchingPipeline)(Keep.left)
       .mapAsync(concurrentConnections) { (traces: Traces) =>
-        Marshal(traces).to[RequestEntity].map{ entity =>
+        println(traces)
+        Marshal(traces).to[RequestEntity].map { entity =>
           HttpRequest(
-            HttpMethods.PATCH,
-            s"https://cloudtrace.googleapis.com/v1/projects/${projectId}/traces",
+            method = HttpMethods.PATCH,
+            uri =
+              s"https://cloudtrace.googleapis.com/v1/projects/${projectId}/traces",
             entity = entity
           )
         }
       }
+      .viaMat(
+        OAuth2.authenticatedFlow(
+          Http(),
+          serviceAccountFile,
+          Seq(
+            "https://www.googleapis.com/auth/trace.append"
+          )))(Keep.left)
       .map(req => (req, ()))
       .viaMat(connectionPool)(Keep.left)
       .mapError {
         case NonFatal(e) =>
-          system.log.warning(
-            s"Exception encountered while submitting trace: $e")
+          system.log.error(s"Exception encountered while submitting trace", e)
+          e.printStackTrace
           e
       }
       .to(Sink.ignore)
