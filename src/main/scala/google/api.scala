@@ -1,12 +1,13 @@
 package xyz.driver.tracing
 package google
 
-import spray.json._
-import spray.json.DefaultJsonProtocol.{LongJsonFormat => _, _}
-import java.util.UUID
 import java.nio.ByteBuffer
 import java.time._
 import java.time.format._
+import java.util.UUID
+
+import spray.json.DefaultJsonProtocol.{LongJsonFormat => _, _}
+import spray.json._
 
 case class TraceSpan(
     spanId: Long,

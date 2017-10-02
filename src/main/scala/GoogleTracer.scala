@@ -1,19 +1,18 @@
 package xyz.driver.tracing
 
-import google._
 import java.nio.file.Path
-import akka.stream._
-import akka.stream.scaladsl._
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl._
-import akka.http.scaladsl.marshalling._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.marshalling._
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.server._
-import scala.util.control._
+import akka.stream._
+import akka.stream.scaladsl._
+import xyz.driver.tracing.google._
+
 import scala.concurrent.duration._
-import spray.json.DefaultJsonProtocol._
-import java.util.UUID
+import scala.util.control._
 
 class GoogleTracer(projectId: String,
                    serviceAccountFile: Path,
@@ -69,7 +68,7 @@ class GoogleTracer(projectId: String,
       .viaMat(connectionPool)(Keep.left)
       .mapError {
         case NonFatal(e) =>
-          system.log.error(s"Exception encountered while submitting trace", e)
+          system.log.error(e, s"Exception encountered while submitting trace")
           e
       }
       .to(Sink.ignore)

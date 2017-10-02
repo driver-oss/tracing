@@ -1,22 +1,21 @@
 package xyz.driver.tracing
 package google
 
-import akka.stream.scaladsl._
-import akka.stream._
-import akka.stream.stage._
+import java.nio.file._
+import java.time._
+
 import akka.http.scaladsl._
-import akka.http.scaladsl.unmarshalling._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
-import akka.util.ByteString
-import java.time._
-import java.nio.file._
-import spray.json._
-import spray.json.DefaultJsonProtocol._
+import akka.http.scaladsl.unmarshalling._
+import akka.stream._
+import akka.stream.scaladsl._
 import pdi.jwt._
+import spray.json.DefaultJsonProtocol._
+import spray.json._
+
 import scala.concurrent._
-import scala.concurrent.duration._
 
 object OAuth2 {
 

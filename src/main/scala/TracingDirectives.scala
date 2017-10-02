@@ -1,13 +1,12 @@
 package xyz.driver.tracing
 
+import java.util.UUID
+
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.Directives._
-import java.util.UUID
-import scala.util.Random
-import java.time._
-import scala.concurrent._
+import akka.http.scaladsl.server._
+
 import scala.collection.immutable.Seq
 
 trait TracingDirectives {
@@ -21,7 +20,9 @@ trait TracingDirectives {
   def withTraceContext(ctx: TraceContext): Directive0 =
     mapRequest(req => req.withHeaders(ctx.headers))
 
-  def trace(tracer: Tracer, name: String, extraLabels: Map[String, String] = Map.empty): Directive0 =
+  def trace(tracer: Tracer,
+            name: String,
+            extraLabels: Map[String, String] = Map.empty): Directive0 =
     extractRequest.flatMap { request =>
       val labels = Map(
         "/http/user_agent" -> "driver-tracer",

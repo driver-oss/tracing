@@ -1,18 +1,20 @@
 package xyz.driver.tracing
 
-import akka.actor._
-import akka.stream._
 import java.nio.file._
-import akka.http.scaladsl.server._
+
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import TracingDirectives._
+import org.scalatest._
+import xyz.driver.tracing.TracingDirectives._
+
 import scala.concurrent._
 import scala.concurrent.duration._
 
-import org.scalatest._
-
-class TracingDirectivesSpec extends FlatSpec with BeforeAndAfterAll with ScalatestRouteTest {
+class TracingDirectivesSpec
+    extends FlatSpec
+    with BeforeAndAfterAll
+    with ScalatestRouteTest {
 
   implicit val tracer = new GoogleTracer(
     "driverinc-sandbox",
@@ -33,12 +35,12 @@ class TracingDirectivesSpec extends FlatSpec with BeforeAndAfterAll with Scalate
         }
       }
     } ~
-    pathPrefix("2") {
-      trace(tracer, "test-sub-trace-2") {
-        Thread.sleep(20)
-        complete("ok")
+      pathPrefix("2") {
+        trace(tracer, "test-sub-trace-2") {
+          Thread.sleep(20)
+          complete("ok")
+        }
       }
-    }
   }
 
   "Tracer" should "submit" in {
