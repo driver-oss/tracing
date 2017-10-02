@@ -47,10 +47,8 @@ class GoogleTracer(projectId: String,
   lazy val queue: SourceQueueWithComplete[Span] = {
     Source
       .queue[Span](bufferSize, OverflowStrategy.dropNew)
-      .log("debug")
       .viaMat(batchingPipeline)(Keep.left)
       .mapAsync(concurrentConnections) { (traces: Traces) =>
-        println(traces)
         Marshal(traces).to[RequestEntity].map { entity =>
           HttpRequest(
             method = HttpMethods.PATCH,
@@ -72,7 +70,6 @@ class GoogleTracer(projectId: String,
       .mapError {
         case NonFatal(e) =>
           system.log.error(s"Exception encountered while submitting trace", e)
-          e.printStackTrace
           e
       }
       .to(Sink.ignore)

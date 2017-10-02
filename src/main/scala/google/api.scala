@@ -2,7 +2,7 @@ package xyz.driver.tracing
 package google
 
 import spray.json._
-import spray.json.DefaultJsonProtocol._
+import spray.json.DefaultJsonProtocol.{LongJsonFormat => _, _}
 import java.util.UUID
 import java.nio.ByteBuffer
 import java.time._
@@ -47,13 +47,24 @@ object TraceSpan {
 
   implicit val instantFormat = new JsonFormat[Instant] {
     val formatter = DateTimeFormatter
-      .ofPattern("yyyy-MM-dd'T'HH:mm:ssXXXZ")
+      .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
       .withZone(ZoneId.of("UTC"))
     override def write(x: Instant): JsValue = JsString(formatter.format(x))
     override def read(x: JsValue): Instant = x match {
       case JsString(x) => Instant.parse(x)
       case other =>
         spray.json.deserializationError(s"`$other` is not a valid instant")
+    }
+  }
+
+  implicit val longFormat: JsonFormat[Long] = new JsonFormat[Long] {
+    override def write(x: Long): JsValue = {
+      JsString(java.lang.Long.toUnsignedString(x))
+    }
+    override def read(x: JsValue): Long = x match {
+      case JsString(num) => num.toLong
+      case other =>
+        spray.json.deserializationError("expected long")
     }
   }
 

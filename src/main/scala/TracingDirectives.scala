@@ -21,29 +21,35 @@ trait TracingDirectives {
   def withTraceContext(ctx: TraceContext): Directive0 =
     mapRequest(req => req.withHeaders(ctx.headers))
 
-  def trace(name: String, labels: Map[String, String] = Map.empty)(
-      implicit tracer: Tracer): Directive0 =
-    optionalTraceContext.flatMap {
-      case parent =>
-        val span: Span = parent match {
-          case None => // no parent span, create new trace
-            Span(
-              name = name,
-              labels = labels
-            )
-          case Some(TraceContext(traceId, parentSpanId)) =>
-            Span(
-              name = name,
-              traceId = traceId,
-              parentSpanId = parentSpanId,
-              labels = labels
-            )
-        }
+  def trace(tracer: Tracer, name: String, extraLabels: Map[String, String] = Map.empty): Directive0 =
+    extractRequest.flatMap { request =>
+      val labels = Map(
+        "/http/user_agent" -> "driver-tracer",
+        "/http/method" -> request.method.name,
+        "/http/url" -> request.uri.path.toString,
+        "/http/host" -> request.uri.authority.host.toString
+      ) ++ extraLabels
 
-        withTraceContext(TraceContext.fromSpan(span)) & mapRouteResult { res =>
-          tracer.submit(span.end())
-          res
-        }
+      val span: Span = TraceContext.fromHeaders(request.headers) match {
+        case None => // no parent span, create new trace
+          Span(
+            name = name,
+            labels = labels
+          )
+        case Some(TraceContext(traceId, parentSpanId)) =>
+          Span(
+            name = name,
+            traceId = traceId,
+            parentSpanId = parentSpanId,
+            labels = labels
+          )
+      }
+
+      withTraceContext(TraceContext.fromSpan(span)) & mapRouteResult { res =>
+        tracer.submit(span.end())
+        res
+      }
+
     }
 
   /*
@@ -57,7 +63,7 @@ trait TracingDirectives {
 
 }
 
-object TracingDirectives {
+object TracingDirectives extends TracingDirectives {
 
   case class TraceContext(traceId: UUID, parentSpanId: Option[UUID]) {
     import TraceContext._
