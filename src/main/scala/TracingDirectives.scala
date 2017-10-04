@@ -12,18 +12,26 @@ import scala.collection.immutable.Seq
 trait TracingDirectives {
   import TracingDirectives._
 
-  def optionalTraceContext: Directive1[Option[TraceContext]] =
-    extractRequest.map { req =>
-      TraceContext.fromHeaders(req.headers)
+  def extractTraceHeaders: Directive1[Seq[HttpHeader]] =
+    extractRequest.map { request =>
+      request.headers.filter(h =>
+        h.name == TraceHeaderName || h.name == SpanHeaderName)
     }
-
-  def withTraceContext(ctx: TraceContext): Directive0 =
-    mapRequest(req => req.withHeaders(ctx.headers))
 
   def trace(tracer: Tracer,
             name: String,
             extraLabels: Map[String, String] = Map.empty): Directive0 =
     extractRequest.flatMap { request =>
+      def getHeader(name: String): Option[String] =
+        request.headers.find(_.name == name).map(_.value)
+
+      // get existing trace or start a new one
+      val traceId = getHeader(TraceHeaderName)
+        .map(UUID.fromString)
+        .getOrElse(UUID.randomUUID())
+
+      val parentSpanId = getHeader(SpanHeaderName).map(UUID.fromString)
+
       val labels = Map(
         "/http/user_agent" -> "driver-tracer",
         "/http/method" -> request.method.name,
@@ -31,64 +39,28 @@ trait TracingDirectives {
         "/http/host" -> request.uri.authority.host.toString
       ) ++ extraLabels
 
-      val span: Span = TraceContext.fromHeaders(request.headers) match {
-        case None => // no parent span, create new trace
-          Span(
-            name = name,
-            labels = labels
-          )
-        case Some(TraceContext(traceId, parentSpanId)) =>
-          Span(
-            name = name,
-            traceId = traceId,
-            parentSpanId = parentSpanId,
-            labels = labels
-          )
+      val span = Span(
+        name = name,
+        traceId = traceId,
+        parentSpanId = parentSpanId,
+        labels = labels
+      )
+
+      val childHeaders = Seq(
+        RawHeader(TraceHeaderName, span.traceId.toString),
+        RawHeader(SpanHeaderName, span.spanId.toString)
+      )
+
+      mapRequest(childRequest => childRequest.withHeaders(childHeaders)) & mapRouteResult {
+        result =>
+          tracer.submit(span.end())
+          result
       }
-
-      withTraceContext(TraceContext.fromSpan(span)) & mapRouteResult { res =>
-        tracer.submit(span.end())
-        res
-      }
-
     }
-
-  /*
-  def span2(name2: String, tracer: Tracer): Directive0 = {
-    val f: RouteResult ⇒ RouteResult = ???
-    Directive { inner ⇒ ctx ⇒
-      inner(())(ctx).map(f)(ctx.executionContext)
-    }
-  }
- */
 
 }
 
 object TracingDirectives extends TracingDirectives {
-
-  case class TraceContext(traceId: UUID, parentSpanId: Option[UUID]) {
-    import TraceContext._
-
-    def headers: Seq[HttpHeader] =
-      Seq(RawHeader(TraceHeaderName, traceId.toString)) ++
-        parentSpanId.toSeq.map(id => RawHeader(SpanHeaderName, id.toString))
-  }
-  object TraceContext {
-    val TraceHeaderName = "Tracing-Trace-Id"
-    val SpanHeaderName = "Tracing-Span-Id"
-
-    def fromHeaders(headers: Seq[HttpHeader]): Option[TraceContext] = {
-      val traceId = headers
-        .find(_.name == TraceHeaderName)
-        .map(_.value)
-        .map(UUID.fromString)
-      val parentSpanId =
-        headers.find(_.name == SpanHeaderName).map(_.value).map(UUID.fromString)
-      traceId.map { tid =>
-        TraceContext(tid, parentSpanId)
-      }
-    }
-    def fromSpan(span: Span) = TraceContext(span.traceId, Some(span.spanId))
-  }
-
+  val TraceHeaderName = "Tracing-Trace-Id"
+  val SpanHeaderName = "Tracing-Span-Id"
 }
