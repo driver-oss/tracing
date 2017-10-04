@@ -27,23 +27,22 @@ val route =
   // report how long any request to this service takes
   trace(tracer) {
     path("my-service-endpoint") {
-	  get {
-	    // include a sub-trace with a custom name
-	    trace(tracer, Some("complex-call")) {
-		  // do something that takes time
-		  complete("done")
-	    }
-	  }
+      get {
+        // include a sub-trace with a custom name
+        trace(tracer, Some("complex-call")) {
+          // do something that takes time
+          complete("done")
+        }
+      }
     } ~
     path("proxy-service-endpoint") {
-	  // extract tracing headers so they may be injected into nested requests
-	  extractTraceHeaders{ headers =>
-	    // call external service with the existing parent tracing headers
-		complete("done")
-	  }
+      // extract tracing headers so they may be injected into nested requests
+      extractTraceHeaders{ headers =>
+        // call external service with the existing parent tracing headers
+        complete("done")
+      }
     }
   }
-
 ```
 
 ## Tracing Backends
