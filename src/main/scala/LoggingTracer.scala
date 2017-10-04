@@ -3,15 +3,12 @@ package xyz.driver.tracing
 import java.util.UUID
 import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
-import akka.event.LoggingAdapter
 import spray.json._
 
-class LoggingTracer(implicit logger: LoggingAdapter) extends Tracer {
+class LoggingTracer(logger: String => Unit) extends Tracer {
   import LoggingTracer.JsonProtocol._
 
-  override def submit(span: Span): Unit = logger.debug(
-    span.toJson.compactPrint
-  )
+  override def submit(span: Span): Unit = logger(span.toJson.compactPrint)
 }
 
 object LoggingTracer {

@@ -19,7 +19,7 @@ trait TracingDirectives {
     }
 
   def trace(tracer: Tracer,
-            name: String,
+            name: Option[String] = None,
             extraLabels: Map[String, String] = Map.empty): Directive0 =
     extractRequest.flatMap { request =>
       def getHeader(name: String): Option[String] =
@@ -40,7 +40,7 @@ trait TracingDirectives {
       ) ++ extraLabels
 
       val span = Span(
-        name = name,
+        name = name.getOrElse(request.uri.path.toString),
         traceId = traceId,
         parentSpanId = parentSpanId,
         labels = labels
