@@ -17,6 +17,7 @@ import spray.json._
 
 import scala.concurrent._
 
+/** OAUTH2 utilities. */
 object OAuth2 {
 
   private case class ServiceAccount(project_id: String,
@@ -96,6 +97,7 @@ object OAuth2 {
             Future.successful((request, expiration, accessToken))
           }
       }
+      .async
       .drop(1) // drop initial, empty HttpRequest
       .map {
         case (request, _, accessToken) =>

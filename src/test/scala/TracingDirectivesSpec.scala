@@ -16,13 +16,7 @@ class TracingDirectivesSpec
     with BeforeAndAfterAll
     with ScalatestRouteTest {
 
-  implicit val tracer = new GoogleTracer(
-    "driverinc-sandbox",
-    Paths.get(
-      system.settings.config.getString("tracing.google.service-account-file"))
-  )
-
-  val route: Route = trace(tracer, "example.org") {
+  def route(tracer: Tracer): Route = trace(tracer, "example.org") {
     pathPrefix("1") {
       trace(tracer, "test-sub-trace-1") {
         Thread.sleep(2)
@@ -43,18 +37,20 @@ class TracingDirectivesSpec
       }
   }
 
-  "Tracer" should "submit" in {
-    for (i <- 0 until 100) {
-      Get(s"https://example.org/${i % 2 + 1}") ~> route ~> check {
+  "Google Tracer" should "submit" in {
+    val tracer = new GoogleTracer(
+      "driverinc-sandbox",
+      Paths.get(
+        system.settings.config.getString("tracing.google.service-account-file"))
+    )
+
+    val futures: Seq[Assertion] = for (i <- 0 until 100) yield {
+      Get(s"https://example.org/${i % 2 + 1}") ~> route(tracer) ~> check {
         assert(responseAs[String] == "ok")
       }
     }
-  }
 
-  override def afterAll() = {
-    tracer.queue.complete()
-    Await.ready(tracer.queue.watchCompletion(), Duration.Inf)
-    super.afterAll()
+    Await.ready(tracer.close(), 30.seconds)
   }
 
 }
