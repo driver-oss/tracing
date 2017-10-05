@@ -4,7 +4,8 @@ version in ThisBuild := {
   ("git describe --always --dirty=-SNAPSHOT --match v[0-9].*" !!).tail.trim
 }
 
-scalaVersion := "2.12.3"
+crossScalaVersions := Seq("2.11.11", "2.12.3")
+scalaVersion := crossScalaVersions.value.last
 
 libraryDependencies ++= Seq(
   "com.pauldijou" %% "jwt-core" % "0.14.0",

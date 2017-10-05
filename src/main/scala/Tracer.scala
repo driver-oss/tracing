@@ -13,6 +13,6 @@ trait Tracer {
   def submit(span: Span): Unit
 
   /** Aggregate any potentially queued submissions and perform any cleanup logic. */
-  def close(): Future[_] = Future.unit
+  def close(): Future[_] = Future.successful(())
 
 }
