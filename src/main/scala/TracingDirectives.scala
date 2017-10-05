@@ -51,7 +51,12 @@ trait TracingDirectives {
         RawHeader(SpanHeaderName, span.spanId.toString)
       )
 
-      mapRequest(childRequest => childRequest.withHeaders(childHeaders)) & mapRouteResult {
+      mapRequest(childRequest =>
+        childRequest
+          .withHeaders(childRequest.headers
+            .filterNot(h =>
+              h.name() == TraceHeaderName ||
+                h.name() == SpanHeaderName) ++ childHeaders)) & mapRouteResult {
         result =>
           tracer.submit(span.end())
           result
