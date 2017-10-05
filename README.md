@@ -59,7 +59,7 @@ Various tracing aggregation backends are provided out of the box.
 ### Logging
 The `LoggingTracer` simply logs any traces locally.
 
-### Google Stackdriver Tracin
+### Google Stackdriver Tracing
 The `GoogleTracer` interacts with the Google Stack Driver API, as described here:
 https://cloud.google.com/trace/docs/reference/v1/rest/v1/projects.traces#Trace
 
