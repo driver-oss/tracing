@@ -1,7 +1,5 @@
 scalaVersion := "2.12.3"
 
-organization := "xyz.driver"
-
 libraryDependencies ++= Seq(
   "com.pauldijou" %% "jwt-core" % "0.14.0",
   "com.typesafe.akka" %% "akka-http" % "10.0.10",
