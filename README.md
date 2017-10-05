@@ -17,6 +17,10 @@ libraryDependencies += "xyz.driver" %% "tracing" % "0.0.1"
 ```
 
 ### Example
+
+The library provides tracing directives which may be used to track and
+report traces accross multiple, nested service calls.
+
 ```scala
 import xyz.driver.tracing._
 import xyz.driver.tracing.TracingDirectives._
@@ -46,12 +50,26 @@ val route =
 ```
 
 ## Tracing Backends
+Various tracing aggregation backends are provided out of the box.
 
 ### Logging
-TODO
+The `LoggingTracer` simply logs any traces locally.
 
-### Google Stackdriver Tracing
+### Google Stackdriver Tracin
+The `GoogleTracer` interacts with the Google Stack Driver API, as described here:
 https://cloud.google.com/trace/docs/reference/v1/rest/v1/projects.traces#Trace
-TODO
 
+## Copying
+Copyright 2017 Driver Inc.
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
