@@ -3,10 +3,12 @@ licenses in ThisBuild := Seq(
   ("Apache 2.0", url("https://www.apache.org/licenses/LICENSE-2.0")))
 homepage in ThisBuild := Some(url("https://github.com/drivergroup/tracing"))
 publishMavenStyle in ThisBuild := true
-publishTo in ThisBuild := {
-  val nexus = "https://oss.sonatype.org/"
-  Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
+publishTo := Some(
+  if (isSnapshot.value)
+    Opts.resolver.sonatypeSnapshots
+  else
+    Opts.resolver.sonatypeStaging
+)
 
 scmInfo := Some(
   ScmInfo(
