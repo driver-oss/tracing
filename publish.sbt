@@ -31,6 +31,3 @@ developers := List(
     url = url("https://driver.xyz")
   )
 )
-
-useGpg := true
-pgpSigningKey := Some(0x488F99C904F077E8l)
