@@ -33,4 +33,4 @@ developers := List(
 )
 
 useGpg := true
-pgpSigningKey := Some(0x1E373AB444C7D4C7l)
+pgpSigningKey := Some(0x488F99C904F077E8l)
