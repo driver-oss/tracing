@@ -1,3 +1,9 @@
+----
+
+This project has been merged into [`driver-core`](https://github.com/drivergroup/driver-core) (module `core-reporting`).
+
+----
+
 [![Build Status](https://travis-ci.org/drivergroup/tracing.svg?branch=master)](https://travis-ci.org/drivergroup/tracing)
 [![Download](https://img.shields.io/maven-central/v/xyz.driver/tracing_2.12.svg)](http://search.maven.org/#search|ga|1|xyz.driver%20tracing-)
 
